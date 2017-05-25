@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "chat-api",
   "version": "1.0.0",
   "description": "API facade for calls to outside endpoints",
   "main": "index.js",
