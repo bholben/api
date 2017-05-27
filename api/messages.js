@@ -28,8 +28,12 @@ function syncChatSessions(user, callback=()=>{}) {
       // Use lodash map to:
       //     (1) convert snap.val() object into a sessions array
       //     (2) pull the key down into the session object
+      //     (3) do the same for messages inside each session
       const sessions = map(snap.val(), (session, key) => {
         session.key = key;
+        session.messages = map(session.messges, (message, key) => {
+          message.key = key;
+        });
         return session;
       });
       callback(sessions);
