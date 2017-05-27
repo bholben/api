@@ -31,7 +31,7 @@ function syncChatSessions(user, callback=()=>{}) {
       //     (3) do the same for messages inside each session
       const sessions = map(snap.val(), (session, key) => {
         session.key = key;
-        session.messages = map(session.messges, (message, key) => {
+        session.messages = map(session.messages, (message, key) => {
           message.key = key;
         });
         return session;
