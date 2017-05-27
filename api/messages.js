@@ -2,7 +2,7 @@ const firebase = require('firebase');
 const { map } = require('lodash');
 const { iMessage } = require('../models');
 
-module.exports = { syncMessages, sendMessage, deleteMessage };
+module.exports = { syncMessages, syncChatSessions, sendMessage, deleteMessage };
 
 function syncMessages(user, callback=()=>{}) {
   user && firebase.database()
@@ -17,6 +17,22 @@ function syncMessages(user, callback=()=>{}) {
         return message;
       });
       callback(messages);
+    }, console.log);
+}
+
+function syncChatSessions(user, callback=()=>{}) {
+  user && firebase.database()
+    .ref('users')
+    .orderByKey().limitToLast(100)
+    .on('value', snap => {
+      // Use lodash map to:
+      //     (1) convert snap.val() object into a sessions array
+      //     (2) pull the key down into the session object
+      const sessions = map(snap.val(), (session, key) => {
+        session.key = key;
+        return session;
+      });
+      callback(sessions);
     }, console.log);
 }
 
