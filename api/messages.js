@@ -33,6 +33,7 @@ function syncChatSessions(user, callback=()=>{}) {
         session.key = key;
         session.messages = map(session.messages, (message, key) => {
           message.key = key;
+          return message;
         });
         return session;
       });
