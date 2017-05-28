@@ -23,21 +23,22 @@ function syncMessages(user, callback=()=>{}) {
 function syncChatSessions(user, callback=()=>{}) {
   user && firebase.database()
     .ref('users')
-    .orderByKey().limitToLast(100)
+    .orderByChild('lastTimestamp').limitToLast(100)
     .on('value', snap => {
-      // Use lodash map to:
-      //     (1) convert snap.val() object into a sessions array
-      //     (2) pull the key down into the session object
-      //     (3) do the same for messages inside each session
-      const sessions = map(snap.val(), (session, key) => {
-        session.key = key;
+      // Use DataSnapShot.prototype.forEach to guarantee orderByChild works
+      const sessions = [];
+      snap.forEach(child => {
+        const session = child.val();
+        session.key = child.key;
+        // Use lodash map at this level since order is not in play (its cleaner)
         session.messages = map(session.messages, (message, key) => {
           message.key = key;
           return message;
         });
-        return session;
+        sessions.push(session);
       });
-      callback(sessions);
+
+      callback(sessions.reverse());
     }, console.log);
 }
 
@@ -45,6 +46,12 @@ function sendMessage(message, user) {
   return iMessage.isValid(message) && firebase.database()
     .ref(`users/${user.uid}/messages`)
     .push(message)
+    .then(() => {
+      firebase.database()
+        .ref(`users/${user.uid}`)
+        .child('lastTimestamp')
+        .set(message.timestamp);
+    })
     .catch(console.log);
 }
 
