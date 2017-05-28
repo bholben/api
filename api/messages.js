@@ -6,7 +6,7 @@ module.exports = { syncChatSessions, syncMessages, sendMessage, deleteMessage };
 
 function syncChatSessions(user, callback=()=>{}) {
   user && firebase.database()
-    .ref('users')
+    .ref('chat/sessions')
     .orderByChild('lastTimestamp').limitToLast(100)
     .on('value', snap => {
       // Use DataSnapShot.prototype.forEach to guarantee orderByChild works
@@ -28,7 +28,7 @@ function syncChatSessions(user, callback=()=>{}) {
 
 function syncMessages(user, callback=()=>{}) {
   user && firebase.database()
-    .ref(`users/${user.uid}/messages`)
+    .ref(`chat/sessions/${user.uid}/messages`)
     .orderByKey().limitToLast(100)
     .on('value', snap => {
       // Use lodash map to:
@@ -48,7 +48,7 @@ function sendMessage(message, user, sessionKey) {
     const timestamp = firebase.database.ServerValue.TIMESTAMP;
     const stampedMessage = Object.assign({}, message, { timestamp });
     return firebase.database()
-      .ref(`users/${uid}/messages`)
+      .ref(`chat/sessions/${uid}/messages`)
       .push(stampedMessage)
       .then(() => setLastTimestamp(uid, timestamp))
       .catch(console.log);
@@ -60,7 +60,7 @@ function sendMessage(message, user, sessionKey) {
 function deleteMessage(message, user, sessionKey) {
   const uid = sessionKey || user.uid;
   return firebase.database()
-    .ref(`users/${uid}/messages/${message.key}`)
+    .ref(`chat/sessions/${uid}/messages/${message.key}`)
     .remove()
     .then(() => revertTimestamp(uid))
     .catch(console.log);
@@ -71,20 +71,20 @@ function deleteMessage(message, user, sessionKey) {
 
 function setLastTimestamp(uid, timestamp) {
   firebase.database()
-    .ref(`users/${uid}`)
+    .ref(`chat/sessions/${uid}`)
     .child('lastTimestamp')
     .set(timestamp);
 }
 
 function revertTimestamp(uid) {
   firebase.database()
-    .ref(`users/${uid}/messages`)
+    .ref(`chat/sessions/${uid}/messages`)
     .orderByKey().limitToLast(1)
     .once('value', snap => {
       snap.forEach(message => {
         // Loop of one message :)
         firebase.database()
-          .ref(`users/${uid}`)
+          .ref(`chat/sessions/${uid}`)
           .child('lastTimestamp')
           .set(message.val().timestamp);
       });
