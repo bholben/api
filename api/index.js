@@ -1,5 +1,5 @@
 module.exports = Object.assign(
   {},
   require('./messages'),
-  { auth: require('../firebase').auth() }
+  { auth: require('./auth') }
 );

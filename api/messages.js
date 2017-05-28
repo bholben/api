@@ -44,27 +44,50 @@ function syncMessages(user, callback=()=>{}) {
 
 function sendMessage(message, user, sessionKey) {
   if (iMessage.isValid(message)) {
+    const uid = sessionKey || user.uid;
     const timestamp = firebase.database.ServerValue.TIMESTAMP;
     const stampedMessage = Object.assign({}, message, { timestamp });
     return firebase.database()
-      .ref(`users/${sessionKey || user.uid}/messages`)
+      .ref(`users/${uid}/messages`)
       .push(stampedMessage)
-      .then(() => {
-        firebase.database()
-          .ref(`users/${sessionKey || user.uid}`)
-          .child('lastTimestamp')
-          .set(timestamp);
-      })
+      .then(() => setLastTimestamp(uid, timestamp))
       .catch(console.log);
   } else {
     return Promise.reject('Invalid message object');
   }
 }
 
-function deleteMessage(message, user) {
-  // TODO: Update the lastTimestamp
+function deleteMessage(message, user, sessionKey) {
+  const uid = sessionKey || user.uid;
   return firebase.database()
-    .ref(`users/${user.uid}/messages/${message.key}`)
+    .ref(`users/${uid}/messages/${message.key}`)
     .remove()
+    .then(() => revertTimestamp(uid))
     .catch(console.log);
+}
+
+
+// Private helper functions
+
+function setLastTimestamp(uid, timestamp) {
+  firebase.database()
+    .ref(`users/${uid}`)
+    .child('lastTimestamp')
+    .set(timestamp);
+}
+
+function revertTimestamp(uid) {
+  firebase.database()
+    .ref(`users/${uid}/messages`)
+    .orderByKey().limitToLast(1)
+    .once('value', snap => {
+      snap.forEach(message => {
+        // Loop of one message :)
+        firebase.database()
+          .ref(`users/${uid}`)
+          .child('lastTimestamp')
+          .set(message.val().timestamp);
+      });
+    }, console.log);
+
 }
