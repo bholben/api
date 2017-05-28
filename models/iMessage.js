@@ -4,8 +4,8 @@ module.exports = { isValid };
 
 // Poor man's validator for now
 function isValid(message) {
-  return isString(message.displayName) &&
+  return isString(message.user.displayName) &&
+    isString(message.user.uid) &&
     isString(message.text) &&
-    (isNumber(message.timestamp) || isPlainObject(message.timestamp)) &&
     (isBoolean(message.isAgent) || message.isAgent === undefined);
 }
