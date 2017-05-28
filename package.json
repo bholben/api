@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "Bob Holben",
   "license": "ISC",
-  "devDependencies": {
+  "dependencies": {
     "firebase": "^4.0.0",
     "lodash": "^4.17.4"
   }
