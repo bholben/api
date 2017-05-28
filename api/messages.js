@@ -1,4 +1,4 @@
-const firebase = require('firebase');
+const firebase = require('../firebase');
 const { map } = require('lodash');
 const { iMessage } = require('../models');
 
@@ -43,17 +43,14 @@ function syncMessages(user, callback=()=>{}) {
 }
 
 function sendMessage(message, user, sessionKey) {
-  console.log({sessionKey});
   if (iMessage.isValid(message)) {
     const timestamp = firebase.database.ServerValue.TIMESTAMP;
     const stampedMessage = Object.assign({}, message, { timestamp });
     return firebase.database()
-      // .ref(`users/${user.uid}/messages`)
       .ref(`users/${sessionKey || user.uid}/messages`)
       .push(stampedMessage)
       .then(() => {
         firebase.database()
-          // .ref(`users/${user.uid}`)
           .ref(`users/${sessionKey || user.uid}`)
           .child('lastTimestamp')
           .set(timestamp);
