@@ -1,0 +1,56 @@
+{
+  "chat" : {
+    "sessions" : {
+      "6ucnxM7B6BS9JUfIlfJcQjfRLAz1" : {
+        "lastTimestamp" : 1495506572933,
+        "user" : {
+          "displayName" : "Anonymous",
+          "email" : "bholben@gmail.com",
+          "uid" : "6ucnxM7B6BS9JUfIlfJcQjfRLAz1"
+        },
+        "messages" : {
+          "-Kkmg6m_paG_q7gWhkzB" : {
+            "text" : "Hi, I need some help",
+            "timestamp" : 1495499046146
+          },
+          "-Kkmg9X27TiXXXtLsIqH" : {
+            "text" : "I'm Addison.  I can help.",
+            "timestamp" : 1495499057359,
+            "agent" : {
+              "displayName" : "Addison",
+              "email" : "addison@gmail.com",
+              "uid" : "1tBWL62CjdXM7nby04T7E3SjppU2"
+            }
+          },
+          "-Kkn7pM6e-Ag0bXMulHB" : {
+            "text" : "👍👍👍",
+            "timestamp" : 1495506572833
+          }
+        }
+      },
+      "hgrrPjnAAbXane9WwjGrlIOprJp2" : {
+        "lastTimestamp" : 1495987389880,
+        "user" : {
+          "displayName" : "Anonymous",
+          "email" : "bholben@gmail.com",
+          "uid" : "hgrrPjnAAbXane9WwjGrlIOprJp2"
+        },
+        "messages" : {
+          "-KlEmNhij219Oj6rxPXG" : {
+            "text" : "I need a long message to check alignment with the avatar and see how everything looks",
+            "timestamp" : 1495987227576,
+            "agent" : {
+              "displayName" : "Spoofer",
+              "email" : "bholben@gmail.com",
+              "uid" : "hgrrPjnAAbXane9WwjGrlIOprJp2"
+            }
+          },
+          "-KlEn-J7a2FzOoF1Sbjb" : {
+            "text" : "Just a one-liner here",
+            "timestamp" : 1495987389780
+          }
+        }
+      }
+    }
+  }
+}

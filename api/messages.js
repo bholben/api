@@ -1,6 +1,5 @@
 const firebase = require('../firebase');
 const { map } = require('lodash');
-const { iMessage } = require('../models');
 
 module.exports = { syncChatSessions, syncMessages, sendMessage, deleteMessage };
 
@@ -43,22 +42,19 @@ function syncMessages(user, callback=()=>{}) {
 }
 
 function sendMessage(message, user, sessionKey) {
-  if (iMessage.isValid(message)) {
-    const uid = sessionKey || user.uid;
-    const timestamp = firebase.database.ServerValue.TIMESTAMP;
-    const stampedMessage = Object.assign({}, message, { timestamp });
-    return firebase.database()
-      .ref(`chat/sessions/${uid}/messages`)
-      .push(stampedMessage)
-      .then(() => setLastTimestamp(uid, timestamp))
-      .catch(console.log);
-  } else {
-    return Promise.reject('Invalid message object');
-  }
+  const uid = sessionKey || user.uid;  // If agent, don't use their user.uid
+  const timestamp = firebase.database.ServerValue.TIMESTAMP;
+  const stampedMessage = Object.assign({}, message, { timestamp });
+  return firebase.database()
+    .ref(`chat/sessions/${uid}/messages`)
+    .push(stampedMessage)
+    .then(() => !sessionKey ? setUser(user) : Promise.resolve())
+    .then(() => setLastTimestamp(uid, timestamp))
+    .catch(console.log);
 }
 
 function deleteMessage(message, user, sessionKey) {
-  const uid = sessionKey || user.uid;
+  const uid = sessionKey || user.uid;  // If agent, don't use their user.uid
   return firebase.database()
     .ref(`chat/sessions/${uid}/messages/${message.key}`)
     .remove()
@@ -69,21 +65,31 @@ function deleteMessage(message, user, sessionKey) {
 
 // Private helper functions
 
+function setUser(user) {
+  return firebase.database()
+    .ref(`chat/sessions/${user.uid}/user`)
+    .update({
+      displayName: user.displayName || 'Anonymous',
+      email: user.email,
+      uid: user.uid,
+    });
+}
+
 function setLastTimestamp(uid, timestamp) {
-  firebase.database()
+  return firebase.database()
     .ref(`chat/sessions/${uid}`)
     .child('lastTimestamp')
     .set(timestamp);
 }
 
 function revertTimestamp(uid) {
-  firebase.database()
+  return firebase.database()
     .ref(`chat/sessions/${uid}/messages`)
     .orderByKey().limitToLast(1)
     .once('value', snap => {
       snap.forEach(message => {
         // Loop of one message :)
-        firebase.database()
+        return firebase.database()
           .ref(`chat/sessions/${uid}`)
           .child('lastTimestamp')
           .set(message.val().timestamp);

@@ -1,0 +1,49 @@
+{
+  // TODO: Get more targeted with read/write access. Right now any authenticated user can
+  //       read and write anywhere under "chat".
+
+  // .read & .write are "OR-ed" together through the cascade
+  // .validate is "AND-ed" together through the cascade
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "chat": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "sessions": {
+	      ".indexOn": ["lastTimestamp"],
+        "$session": { ".validate": "newData.hasChildren(['lastTimestamp', 'messages'])",
+          "lastTimestamp": { ".validate": "newData.isNumber()" },
+          "user": { ".validate": "newData.hasChildren(['displayName', 'email', 'uid'])",
+            "email": { ".validate": "newData.isString() && newData.val().length <= 20 && newData.val().matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$/i)" },
+            "displayName": { ".validate": "newData.isString() && newData.val().length <= 20" },
+            "uid": { ".validate": "newData.isString() && newData.val().length === 28" },
+            "$other": { ".validate": false }
+          },
+          "messages": {
+            "$message": { ".validate": "newData.hasChildren(['text', 'timestamp'])",
+              "text": { ".validate": "newData.isString() && newData.val().length <= 255" },
+              "timestamp": { ".validate": "newData.isNumber()" },
+              "agent": { ".validate": "newData.hasChildren(['displayName', 'email', 'uid'])", // (optional)
+                "email": { ".validate": "newData.isString() && newData.val().length <= 20 && newData.val().matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$/i)" },
+                "displayName": { ".validate": "newData.isString() && newData.val().length <= 20" },
+                "uid": { ".validate": "newData.isString() && newData.val().length === 28" },
+                "$other": { ".validate": false }
+              },
+              "$other": { ".validate": false }
+            }
+          },
+        "$other": { ".validate": false }
+        }
+      },
+      "$other": { ".validate": false }
+    },
+    "$other": { ".validate": false }
+  }
+}
