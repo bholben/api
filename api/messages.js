@@ -42,6 +42,9 @@ function syncMessages(user, callback=()=>{}) {
 }
 
 function sendMessage(message, user, sessionKey) {
+  if (message.agent) {
+    message.agent.displayName = message.agent.displayName || 'Anonymous Agent';
+  }
   const uid = sessionKey || user.uid;  // If agent, don't use their user.uid
   const timestamp = firebase.database.ServerValue.TIMESTAMP;
   const stampedMessage = Object.assign({}, message, { timestamp });
