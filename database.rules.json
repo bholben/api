@@ -18,8 +18,8 @@
       ".write": "auth != null",
       "sessions": {
 	      ".indexOn": ["lastTimestamp"],
-        "$session": { ".validate": "newData.hasChildren(['lastTimestamp', 'messages'])",
-          "lastTimestamp": { ".validate": "newData.isNumber()" },
+        "$session": { ".validate": "newData.hasChildren(['messages'])",
+          "lastTimestamp": { ".validate": "newData.isNumber()" }, // (optional - does not exist initially)
           "user": { ".validate": "newData.hasChildren(['displayName', 'email', 'uid'])",
             "email": { ".validate": "newData.isString() && newData.val().length <= 20 && newData.val().matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$/i)" },
             "displayName": { ".validate": "newData.isString() && newData.val().length <= 20" },

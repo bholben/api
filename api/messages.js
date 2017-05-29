@@ -9,7 +9,7 @@ const _ = require('lodash');
 module.exports = {
   syncChatSessions: syncChatSessions,
   syncMessages: syncMessages,
-  sendMessage: sendMessage,
+  postMessage: postMessage,
   deleteMessage: deleteMessage
 };
 
@@ -53,7 +53,7 @@ function syncMessages(user, callback) {
     }, console.log);
 }
 
-function sendMessage(message, user, sessionKey) {
+function postMessage(message, user, sessionKey) {
   if (message.agent) {
     message.agent.displayName = message.agent.displayName || 'Anonymous Agent';
   }
@@ -64,7 +64,7 @@ function sendMessage(message, user, sessionKey) {
     .ref('chat/sessions/' + user.uid + '/messages')
     .push(stampedMessage)
     .then(function () {
-      return !sessionKey ? setUser(user) : Promise.resolve();
+      return !sessionKey ? updateUser(user) : Promise.resolve();
     })
     .then(function () {
       setLastTimestamp(uid, timestamp);
@@ -86,7 +86,7 @@ function deleteMessage(message, user, sessionKey) {
 
 // Private helper functions
 
-function setUser(user) {
+function updateUser(user) {
   return firebase.database()
     .ref('chat/sessions/' + user.uid + '/user')
     .update({
