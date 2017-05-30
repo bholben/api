@@ -54,14 +54,11 @@ function syncMessages(user, callback) {
 }
 
 function postMessage(message, user, sessionKey) {
-  if (message.agent) {
-    message.agent.displayName = message.agent.displayName || 'Anonymous Agent';
-  }
   const uid = sessionKey || user.uid;  // If agent, don't use their user.uid
   const timestamp = firebase.database.ServerValue.TIMESTAMP;
   const stampedMessage = Object.assign({}, message, { timestamp: timestamp });
   return firebase.database()
-    .ref('chat/sessions/' + user.uid + '/messages')
+    .ref('chat/sessions/' + uid + '/messages')
     .push(stampedMessage)
     .then(function () {
       return !sessionKey ? updateUser(user) : Promise.resolve();
@@ -75,7 +72,7 @@ function postMessage(message, user, sessionKey) {
 function deleteMessage(message, user, sessionKey) {
   const uid = sessionKey || user.uid;  // If agent, don't use their user.uid
   return firebase.database()
-    .ref('chat/sessions/' + user.uid + '/messages/' + message.key)
+    .ref('chat/sessions/' + uid + '/messages/' + message.key)
     .remove()
     .then(function () {
       revertTimestamp(uid);
