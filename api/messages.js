@@ -7,13 +7,13 @@ const firebase = require('../firebase');
 const _ = require('lodash');
 
 module.exports = {
-  syncChatSessions: syncChatSessions,
+  syncTickets: syncTickets,
   syncMessages: syncMessages,
   postMessage: postMessage,
   deleteMessage: deleteMessage
 };
 
-function syncChatSessions(user, callback) {
+function syncTickets(user, callback) {
   callback = callback || function () {};
   user && firebase.database()
     .ref('chat/sessions')
