@@ -7,39 +7,15 @@ const firebase = require('../firebase');
 const _ = require('lodash');
 
 module.exports = {
-  syncTickets: syncTickets,
   syncMessages: syncMessages,
-  postMessage: postMessage,
+  pushMessage: pushMessage,
   deleteMessage: deleteMessage
 };
-
-function syncTickets(user, callback) {
-  callback = callback || function () {};
-  user && firebase.database()
-    .ref('chat/sessions')
-    .orderByChild('lastTimestamp').limitToLast(100)
-    .on('value', function (snap) {
-      // Use DataSnapShot.prototype.forEach to guarantee orderByChild works
-      const sessions = [];
-      snap.forEach(function (child) {
-        const session = child.val();
-        session.key = child.key;
-        // Use lodash map at this level since push key order is good to go
-        session.messages = _.map(session.messages, function (message, key) {
-          message.key = key;
-          return message;
-        });
-        sessions.push(session);
-      });
-
-      callback(sessions.reverse());
-    }, console.log);
-}
 
 function syncMessages(user, callback) {
   callback = callback || function () {};
   user && firebase.database()
-    .ref('chat/sessions/' + user.uid + '/messages')
+    .ref('chat/tickets/' + user.uid + '/messages')
     .orderByKey().limitToLast(100)
     .on('value', function (snap) {
       // Use lodash map to:
@@ -50,34 +26,41 @@ function syncMessages(user, callback) {
         return message;
       });
       callback(messages);
-    }, console.log);
+    }, console.error);
 }
 
-function postMessage(message, user, sessionKey) {
-  const uid = sessionKey || user.uid;  // If agent, don't use their user.uid
+function pushMessage(message, user, ticketId) {
+  // ticketId is not yet available with user's first message
+  const uid = ticketId || user.uid;
   const timestamp = firebase.database.ServerValue.TIMESTAMP;
   const stampedMessage = Object.assign({}, message, { timestamp: timestamp });
+
   return firebase.database()
-    .ref('chat/sessions/' + uid + '/messages')
+    .ref('chat/tickets/' + uid + '/messages')
     .push(stampedMessage)
     .then(function () {
-      return !sessionKey ? updateUser(user) : Promise.resolve();
+      return !ticketId ? updateUser(user) : Promise.resolve();
     })
     .then(function () {
-      setLastTimestamp(uid, timestamp);
+      return setLastTimestamp(uid, timestamp);
     })
-    .catch(console.log);
+    .catch((err) => {
+      console.error(err);
+      return Promise.reject(err);
+    });
 }
 
-function deleteMessage(message, user, sessionKey) {
-  const uid = sessionKey || user.uid;  // If agent, don't use their user.uid
+function deleteMessage(message, user, ticketId) {
   return firebase.database()
-    .ref('chat/sessions/' + uid + '/messages/' + message.key)
+    .ref('chat/tickets/' + ticketId + '/messages/' + message.key)
     .remove()
     .then(function () {
-      revertTimestamp(uid);
+      revertTimestamp(ticketId);
     })
-    .catch(console.log);
+    .catch((err) => {
+      console.error(err);
+      return Promise.reject(err);
+    });
 }
 
 
@@ -85,7 +68,7 @@ function deleteMessage(message, user, sessionKey) {
 
 function updateUser(user) {
   return firebase.database()
-    .ref('chat/sessions/' + user.uid + '/user')
+    .ref('chat/tickets/' + user.uid + '/user')
     .update({
       displayName: user.displayName || 'Anonymous',
       email: user.email,
@@ -95,23 +78,23 @@ function updateUser(user) {
 
 function setLastTimestamp(uid, timestamp) {
   return firebase.database()
-    .ref('chat/sessions/' + uid)
+    .ref('chat/tickets/' + uid)
     .child('lastTimestamp')
     .set(timestamp);
 }
 
 function revertTimestamp(uid) {
   return firebase.database()
-    .ref('chat/sessions/' + uid + '/messages')
+    .ref('chat/tickets/' + uid + '/messages')
     .orderByKey().limitToLast(1)
     .once('value', function (snap) {
       snap.forEach(function (message) {
         // Loop of one message :)
         return firebase.database()
-          .ref('chat/sessions/' + uid)
+          .ref('chat/tickets/' + uid)
           .child('lastTimestamp')
           .set(message.val().timestamp);
       });
-    }, console.log);
+    }, console.error);
 
 }
