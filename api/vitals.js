@@ -6,13 +6,24 @@
 const firebase = require('../firebase');
 
 module.exports = {
-  setVitals: setVitals
+  setVitals: setVitals,
+  changeVitalsItem: changeVitalsItem
 };
 
 function setVitals(vitals, ticketId) {
   return firebase.database()
     .ref('chat/tickets/' + ticketId + '/vitals')
     .set(vitals)
+    .catch((err) => {
+      console.error(err);
+      return Promise.reject(err);
+    });
+}
+
+function changeVitalsItem(key, selected, ticketId) {
+  return firebase.database()
+    .ref('chat/tickets/' + ticketId + '/vitals/' + key)
+    .set(selected)
     .catch((err) => {
       console.error(err);
       return Promise.reject(err);
