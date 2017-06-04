@@ -44,7 +44,7 @@ function pushMessage(message, user, ticketId) {
     .then(function () {
       return setLastTimestamp(uid, timestamp);
     })
-    .catch((err) => {
+    .catch(function (err) {
       console.error(err);
       return Promise.reject(err);
     });
@@ -57,7 +57,7 @@ function deleteMessage(message, user, ticketId) {
     .then(function () {
       revertTimestamp(ticketId);
     })
-    .catch((err) => {
+    .catch(function (err) {
       console.error(err);
       return Promise.reject(err);
     });

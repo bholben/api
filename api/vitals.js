@@ -10,11 +10,18 @@ module.exports = {
   changeVitalsItem: changeVitalsItem
 };
 
-function setVitals(vitals, ticketId) {
+function setVitals(ticketId) {
+  const initialVitals = {
+    assignee:   { id: '',        name: 'Unassigned', email: '' },
+    status:     { id: 'inQueue', name: 'In Queue' },
+    severity:   { id: 'unknown', name: 'Unknown' },
+    escalation: { id: 'agent',   name: 'Agent' },
+    loyalty:    { id: 'base',    name: 'Base' },
+  };
   return firebase.database()
     .ref('chat/tickets/' + ticketId + '/vitals')
-    .set(vitals)
-    .catch((err) => {
+    .set(initialVitals)
+    .catch(function (err) {
       console.error(err);
       return Promise.reject(err);
     });
@@ -24,7 +31,7 @@ function changeVitalsItem(key, selected, ticketId) {
   return firebase.database()
     .ref('chat/tickets/' + ticketId + '/vitals/' + key)
     .set(selected)
-    .catch((err) => {
+    .catch(function (err) {
       console.error(err);
       return Promise.reject(err);
     });
