@@ -7,7 +7,8 @@ const firebase = require('../firebase');
 const _ = require('lodash');
 
 module.exports = {
-  syncTickets: syncTickets
+  syncTickets: syncTickets,
+  applyRemedyToTicket: applyRemedyToTicket,
 };
 
 function syncTickets(user, callback) {
@@ -31,4 +32,10 @@ function syncTickets(user, callback) {
 
       callback(tickets.reverse());
     }, console.error);
+}
+
+function applyRemedyToTicket(ticket, remedy) {
+  return firebase.database()
+    .ref('chat/tickets/' + ticket.key + '/remedies')
+    .push(remedy)
 }

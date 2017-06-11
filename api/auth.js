@@ -15,9 +15,9 @@ const auth = {
         if (err.code === 'auth/user-not-found') {
           firebase.auth().createUserWithEmailAndPassword(email, password)
             .then(callback)
-            .catch(console.log);
+            .catch(console.error);
         } else {
-          console.log(err);
+          console.error(err);
         }
       });
   },

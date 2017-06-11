@@ -10,7 +10,7 @@ module.exports = {
   syncRemedies: syncRemedies,
   pushRemedy: pushRemedy,
   pushRemedyItem: pushRemedyItem,
-  updateRemedyInventory: updateRemedyInventory,
+  consumeRemedyInventory: consumeRemedyInventory,
 };
 
 function syncRemedies(callback) {
@@ -32,13 +32,6 @@ function syncRemedies(callback) {
           .filter('isAvailable')
           .value();
         return remedy;
-        remedy.consumedInventory = _(remedy.inventory)
-          .map(function (item, key) {
-            item.key = key;
-            return item;
-          })
-          .filter('isConsumed')
-          .value();
       });
       callback(remedies);
     }, console.error);
@@ -57,20 +50,17 @@ function pushRemedy(remedy) {
 function pushRemedyItem(remedyId) {
   return firebase.database()
     .ref('chat/remedies/' + remedyId + '/inventory')
-    .push({isAvailable: true})
+    .push({ isAvailable: true })
     .catch(function (err) {
       console.error(err);
       return Promise.reject(err);
     });
 }
 
-function updateRemedyInventory(remedyId, remedyItemId, inventoryStatus) {
-
-  console.log({remedyId, remedyItemId, inventoryStatus});
-
+function consumeRemedyInventory(remedyId, remedyItemId) {
   return firebase.database()
     .ref('chat/remedies/' + remedyId + '/inventory/' + remedyItemId)
-    .update(inventoryStatus)
+    .update({ isAvailable: false })
     .catch(function (err) {
       console.error(err);
       return Promise.reject(err);
