@@ -24,11 +24,21 @@ function syncRemedies(callback) {
       //     (2) pull the key down into the remedy object
       const remedies = _.map(snap.val(), function (remedy, key) {
         remedy.key = key;
-        remedy.inventory = _.map(remedy.inventory, function (item, key) {
+        remedy.availableInventory = _(remedy.inventory)
+          .map(function (item, key) {
             item.key = key;
-          return item;
-        });
+            return item;
+          })
+          .filter('isAvailable')
+          .value();
         return remedy;
+        remedy.consumedInventory = _(remedy.inventory)
+          .map(function (item, key) {
+            item.key = key;
+            return item;
+          })
+          .filter('isConsumed')
+          .value();
       });
       callback(remedies);
     }, console.error);
@@ -54,7 +64,10 @@ function pushRemedyItem(remedyId) {
     });
 }
 
-function updateRemedyInventory(inventoryStatus, remedyId, remedyItemId) {
+function updateRemedyInventory(remedyId, remedyItemId, inventoryStatus) {
+
+  console.log({remedyId, remedyItemId, inventoryStatus});
+
   return firebase.database()
     .ref('chat/remedies/' + remedyId + '/inventory/' + remedyItemId)
     .update(inventoryStatus)
