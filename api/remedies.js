@@ -10,7 +10,7 @@ module.exports = {
   syncRemedies: syncRemedies,
   pushRemedy: pushRemedy,
   pushRemedyItem: pushRemedyItem,
-  updateRemedyItem: updateRemedyItem,
+  updateRemedyInventory: updateRemedyInventory,
 };
 
 function syncRemedies(callback) {
@@ -54,10 +54,10 @@ function pushRemedyItem(remedyId) {
     });
 }
 
-function updateRemedyItem(remedyItem, remedyId) {
+function updateRemedyInventory(inventoryStatus, remedyId, remedyItemId) {
   return firebase.database()
-    .ref('chat/remedies/' + remedyId + 'inventory')
-    .update(remedyItem)
+    .ref('chat/remedies/' + remedyId + '/inventory/' + remedyItemId)
+    .update(inventoryStatus)
     .catch(function (err) {
       console.error(err);
       return Promise.reject(err);
